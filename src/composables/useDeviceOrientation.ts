@@ -5,8 +5,18 @@ export function useDeviceOrientation() {
   const permissionGranted = ref<boolean | null>(null)
 
   const handleOrientation = (event: DeviceOrientationEvent) => {
-    heading.value = Math.round(event.alpha || 0)
+    const alpha = event.alpha ?? 0
+    const beta = event.beta ?? 0
+    const gamma = event.gamma ?? 0
+
+    let correctedHeading = alpha + (beta * gamma) / 90 // Heuristic correction based on tilt
+    correctedHeading = ((correctedHeading % 360) + 360) % 360 // Normalize to [0, 360)
+
+    heading.value = Math.round(correctedHeading)
   }
+
+  const eventType =
+    'ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation'
 
   const requestPermissionIfNeeded = async () => {
     if (
@@ -16,8 +26,9 @@ export function useDeviceOrientation() {
       try {
         const permission = await (DeviceOrientationEvent as any).requestPermission()
         permissionGranted.value = permission === 'granted'
+
         if (permissionGranted.value) {
-          window.addEventListener('deviceorientation', handleOrientation)
+          window.addEventListener(eventType, handleOrientation)
         } else {
           console.warn('Permission denied for device orientation')
         }
@@ -26,8 +37,8 @@ export function useDeviceOrientation() {
         permissionGranted.value = false
       }
     } else {
-      // Android/desktop — autorisé par défaut
-      window.addEventListener('deviceorientation', handleOrientation)
+      // Android or desktop — permission not required
+      window.addEventListener(eventType, handleOrientation)
       permissionGranted.value = true
     }
   }
@@ -37,7 +48,7 @@ export function useDeviceOrientation() {
   })
 
   onUnmounted(() => {
-    window.removeEventListener('deviceorientation', handleOrientation)
+    window.removeEventListener(eventType, handleOrientation)
   })
 
   return {

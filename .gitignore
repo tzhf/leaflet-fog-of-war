@@ -17,7 +17,9 @@ $RECYCLE.BIN/
 log.txt
 npm-debug.log*
 
-/.idea
+# Android Studio / IntelliJ
+android/.idea/
+.idea
 /.ionic
 /.sass-cache
 /.sourcemaps

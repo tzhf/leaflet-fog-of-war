@@ -1,5 +1,5 @@
 // @ts-nocheck
-
+// inpired by https://github.com/ltempier/Leaflet.Fog/blob/master/src/FogLayer.js
 L.FogLayer = (L.Layer ? L.Layer : L.Class).extend({
   initialize: function (latlngs, options) {
     this._latlngs = latlngs
